@@ -122,3 +122,40 @@ class OrdersManageView(BaseContextMixin, TemplateView):
 class UsersManageView(BaseContextMixin, TemplateView):
     """Gestión de usuarios (solo Admin)."""
     template_name = 'admin_panel/users_manage.html'
+
+def custom_404(request, exception):
+    """Vista personalizada para error 404."""
+    return render(request, '404.html', status=404)
+
+
+def custom_404(request, exception):
+    """
+    Vista personalizada para error 404.
+
+    Se activa automáticamente cuando DEBUG=False y el usuario accede a una
+    URL que no existe. Con DEBUG=True, Django muestra su propia página.
+
+    Args:
+        request: Objeto Request de Django.
+        exception: Excepción Http404 que disparó el error.
+
+    Returns:
+        HttpResponse: Render del template 404.html con status 404.
+    """
+    return render(request, '404.html', status=404)
+
+
+def custom_500(request):
+    """
+    Vista personalizada para error 500.
+
+    Se activa cuando hay una excepción no capturada en el servidor.
+    Con DEBUG=True, Django muestra el traceback en lugar de esta página.
+
+    Args:
+        request: Objeto Request de Django.
+
+    Returns:
+        HttpResponse: Render del template 500.html con status 500.
+    """
+    return render(request, '500.html', status=500)

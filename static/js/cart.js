@@ -164,6 +164,10 @@ const Cart = {
             await API.patch(`/api/cart/items/${itemId}/`, { quantity: newQty });
             this.load();
             Auth.updateCartBadge();
+            // Después de actualizar el carro
+            if (typeof Animations !== 'undefined') {
+                Animations.pulseCartBadge();
+            }
         } catch (e) {
             // DRF puede devolver string o lista según cómo se lance el error
             const pick = v => (Array.isArray(v) ? v[0] : v);
@@ -176,6 +180,10 @@ const Cart = {
             // Recargar para sincronizar con el backend
             this.load();
             Auth.updateCartBadge();
+            // Después de actualizar el carro
+            if (typeof Animations !== 'undefined') {
+                Animations.pulseCartBadge();
+            }
         }
     },
 
@@ -186,6 +194,10 @@ const Cart = {
             showFlash('Producto eliminado.', 'info');
             this.load();
             Auth.updateCartBadge();
+            // Después de actualizar el carro
+            if (typeof Animations !== 'undefined') {
+                Animations.pulseCartBadge();
+            }
         } catch (e) {
             showFlash('Error al eliminar.', 'danger');
         }
@@ -198,6 +210,10 @@ const Cart = {
             showFlash('Carro vaciado.', 'info');
             this.load();
             Auth.updateCartBadge();
+            // Después de actualizar el carro
+            if (typeof Animations !== 'undefined') {
+                Animations.pulseCartBadge();
+            }
         } catch (e) {
             showFlash('Error al vaciar.', 'danger');
         }
@@ -209,6 +225,10 @@ const Cart = {
             const data = await API.post('/api/orders/checkout/');
             showFlash('Orden creada. Procede al pago.', 'success');
             Auth.updateCartBadge();
+            // Después de actualizar el carro
+            if (typeof Animations !== 'undefined') {
+                Animations.pulseCartBadge();
+            }
             setTimeout(() => window.location.href = '/mis-ordenes/', 1000);
         } catch (e) {
             const msg = e.data?.stock?.[0] || e.data?.cart?.[0] || 'Error en el checkout.';

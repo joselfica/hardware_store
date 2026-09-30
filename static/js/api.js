@@ -168,3 +168,31 @@ document.addEventListener('scroll', () => {
         navbar.classList.toggle('scrolled', window.scrollY > 20);
     }
 }, { passive: true });
+
+
+/**
+ * Muestra un spinner en un botón durante una operación async.
+ * Restaura el estado original al terminar.
+ *
+ * Uso:
+ *     await withButtonLoading(btn, () => API.post(...));
+ */
+async function withButtonLoading(btn, asyncFn, loadingText = 'Procesando...') {
+    if (!btn) return asyncFn();
+
+    const originalHTML = btn.innerHTML;
+    const originalDisabled = btn.disabled;
+
+    btn.disabled = true;
+    btn.innerHTML = `
+        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+        ${loadingText}
+    `;
+
+    try {
+        return await asyncFn();
+    } finally {
+        btn.disabled = originalDisabled;
+        btn.innerHTML = originalHTML;
+    }
+}

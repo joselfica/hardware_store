@@ -64,6 +64,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',      # CORS primero
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -294,3 +295,19 @@ LOGGING = {
         },
     },
 }
+
+# ============================================================================
+# ARCHIVOS ESTÁTICOS EN PRODUCCIÓN (WhiteNoise)
+# ============================================================================
+# Con DEBUG=False Django no sirve archivos estáticos automáticamente.
+# WhiteNoise se encarga de servirlos de forma eficiente.
+#
+# En desarrollo (DEBUG=True) Django los sirve automáticamente.
+# En producción (DEBUG=False) WhiteNoise toma el control.
+# ============================================================================
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Servir archivos estáticos y media incluso con DEBUG=False
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = DEBUG   # Solo en desarrollo

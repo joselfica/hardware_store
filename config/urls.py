@@ -97,4 +97,21 @@ urlpatterns = [
 # ============================================================================
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+   # urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+
+# ============================================================================
+# HANDLERS DE ERROR PERSONALIZADOS
+# ============================================================================
+
+handler404 = 'apps.catalog.web_views.custom_404'
+
+# ============================================================================
+# HANDLERS DE ERROR PERSONALIZADOS
+# ============================================================================
+# IMPORTANTE: Solo se activan cuando DEBUG=False.
+# Con DEBUG=True, Django muestra sus propias páginas de error de desarrollo.
+# ============================================================================
+
+handler404 = 'apps.catalog.web_views.custom_404'
+handler500 = 'apps.catalog.web_views.custom_500'

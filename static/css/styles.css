@@ -1170,3 +1170,603 @@ a {
     transform: translateY(-2px);
     box-shadow: var(--hs-glow-accent);
 }
+
+/* ============================================================================
+   20. ANIMACIONES SUTILES
+   ============================================================================
+   Micro-interacciones que dan vida a la web sin exagerar. Todas usan
+   transform y opacity para aprovechar la aceleración GPU.
+   ============================================================================ */
+
+/* ============================================================================
+   FADE-IN AL SCROLL (reveal on scroll)
+   ============================================================================
+   Uso: <div data-animate="fade-up">...</div>
+   Variantes: fade-up, fade-left, fade-right, zoom-in
+   ============================================================================ */
+
+[data-animate] {
+    opacity: 0;
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: opacity, transform;
+}
+
+[data-animate="fade-up"] {
+    transform: translateY(20px);
+}
+
+[data-animate="fade-left"] {
+    transform: translateX(-20px);
+}
+
+[data-animate="fade-right"] {
+    transform: translateX(20px);
+}
+
+[data-animate="zoom-in"] {
+    transform: scale(0.95);
+}
+
+[data-animate].animated {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+}
+
+/* ============================================================================
+   RIPPLE EFFECT EN BOTONES
+   ============================================================================
+   Añade una onda al hacer click. Se inyecta dinámicamente desde JS.
+   ============================================================================ */
+
+.btn,
+.chip {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple-effect {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(0);
+    animation: ripple 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+/* ============================================================================
+   NAVBAR CON SCROLL EFFECT
+   ============================================================================
+   Al hacer scroll: sombra sutil + ocultar al bajar.
+   ============================================================================ */
+
+.navbar-hs {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                background-color 0.3s ease;
+    will-change: transform;
+}
+
+.navbar-hs.navbar-scrolled {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    background: rgba(11, 27, 61, 0.98);
+    backdrop-filter: blur(16px);
+}
+
+.navbar-hs.navbar-hidden {
+    transform: translateY(-100%);
+}
+
+/* ============================================================================
+   IMÁGENES CON FADE-IN
+   ============================================================================
+   Evita el "pop-in" brusco cuando cargan las imágenes.
+   ============================================================================ */
+
+img[loading="lazy"] {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+img[loading="lazy"].img-loaded {
+    opacity: 1;
+}
+
+/* ============================================================================
+   BADGE DEL CARRO CON PULSO
+   ============================================================================
+   Cuando el carro cambia, el badge hace un pulso para llamar la atención.
+   ============================================================================ */
+
+.cart-badge-pulse {
+    animation: cart-pulse 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes cart-pulse {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.4); }
+    100% { transform: scale(1); }
+}
+
+/* ============================================================================
+   HOVER SUAVE EN CARDS DE PRODUCTO (tilt 3D)
+   ============================================================================
+   Aplicado desde JS. La transición hace que sea suave.
+   ============================================================================ */
+
+.product-card {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.3s ease;
+    will-change: transform;
+}
+
+/* ============================================================================
+   LINK HOVER CON SUBRAYADO ANIMADO
+   ============================================================================
+   Los enlaces del navbar tienen un subrayado que se anima al hover.
+   ============================================================================ */
+
+.navbar-hs .nav-link {
+    position: relative;
+}
+
+.navbar-hs .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--hs-accent);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 1px;
+}
+
+.navbar-hs .nav-link:hover::after {
+    width: 60%;
+    left: 20%;
+}
+
+/* ============================================================================
+   BOTONES CON ELEVACIÓN Y GLOW AL HOVER
+   ============================================================================
+   Refuerza la sensación de "respuesta" del botón.
+   ============================================================================ */
+
+.btn-hs-primary,
+.btn-hs-accent,
+.btn-hs-success,
+.btn-hs-danger {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-hs-primary:hover,
+.btn-hs-accent:hover {
+    transform: translateY(-2px) scale(1.02);
+}
+
+/* ============================================================================
+   CHIPS DE CATEGORÍA CON BOUNCE
+   ============================================================================
+   Al hacer click en un chip, hace un pequeño bounce.
+   ============================================================================ */
+
+.chip:active {
+    animation: chip-bounce 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes chip-bounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+/* ============================================================================
+   SKELETON LOADER CON PULSO SUAVE
+   ============================================================================
+   Ya tenemos el shimmer, añadimos un pulso sutil adicional.
+   ============================================================================ */
+
+.skeleton-card {
+    animation: shimmer 1.5s infinite, skeleton-pulse 2s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* ============================================================================
+   TRANSICIÓN DE PÁGINA (fade-in global)
+   ============================================================================
+   Toda la página hace un fade-in al cargar para evitar el "flash" blanco.
+   ============================================================================ */
+
+body {
+    animation: page-fade-in 0.4s ease-out;
+}
+
+@keyframes page-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ============================================================================
+   SECCIONES CON REVEAL PROGRESIVO
+   ============================================================================
+   Las cards de productos aparecen escalonadas usando animation-delay.
+   Ya está aplicado en catalog.js (0.05s por card).
+   ============================================================================ */
+
+.product-card {
+    animation: card-appear 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes card-appear {
+    from {
+        opacity: 0;
+        transform: translateY(15px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ============================================================================
+   ACCESIBILIDAD — PREFERS-REDUCED-MOTION
+   ============================================================================
+   Desactiva TODAS las animaciones si el usuario lo prefiere.
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ============================================================================
+   21. LOGO ANIMADO — TEMÁTICA TECH
+   ============================================================================
+   Sistema de animaciones para el logo del navbar. Refuerza la identidad
+   "tecnológica" del proyecto con efectos sutiles:
+     - Pulse del chip (como un procesador activo).
+     - Glow neón respirando (como un LED encendido).
+     - Anillo orbital girando (como un circuito).
+     - Subrayado con scan line (como un escaneo).
+   ============================================================================ */
+
+/* ============================================================================
+   MARCA (contenedor del ícono)
+   ============================================================================ */
+
+.navbar-brand-animated {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--hs-radius-sm);
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+}
+
+.navbar-brand-animated:hover {
+    background: rgba(96, 165, 250, 0.08);
+}
+
+/* ============================================================================
+   BRAND MARK: contenedor del ícono del CPU
+   ============================================================================
+   Aquí ocurre la magia: el ícono vive dentro de un cuadrado con borde
+   degradado que tiene un glow que respira.
+   ============================================================================ */
+
+.brand-mark {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--hs-radius-sm);
+    background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);
+    color: #fff;
+    font-size: 1.15rem;
+    box-shadow:
+        0 2px 8px rgba(37, 99, 235, 0.4),
+        0 0 0 1px rgba(96, 165, 250, 0.3) inset;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+}
+
+/* El ícono del CPU pulsa suavemente (como un procesador activo) */
+.brand-mark i {
+    animation: chip-breathe 3s ease-in-out infinite;
+    will-change: transform, filter;
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes chip-breathe {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 2px rgba(96, 165, 250, 0.6));
+    }
+    50% {
+        transform: scale(1.08);
+        filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.9));
+    }
+}
+
+/* Hover: el ícono gira ligeramente y el glow se intensifica */
+.navbar-brand-animated:hover .brand-mark {
+    transform: rotate(-5deg) scale(1.05);
+    box-shadow:
+        0 4px 16px rgba(37, 99, 235, 0.6),
+        0 0 0 1px rgba(96, 165, 250, 0.5) inset;
+}
+
+.navbar-brand-animated:hover .brand-mark i {
+    animation-duration: 1s;
+}
+
+/* ============================================================================
+   BRAND PULSE: anillo que se expande desde el logo
+   ============================================================================
+   Como una onda de radio o un "ping" de red. Se expande y desaparece
+   cada 3 segundos.
+   ============================================================================ */
+
+.brand-pulse {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--hs-radius-sm);
+    border: 2px solid var(--hs-primary-light);
+    animation: brand-pulse-ring 3s ease-out infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@keyframes brand-pulse-ring {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    70% {
+        transform: scale(1.6);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1.6);
+        opacity: 0;
+    }
+}
+
+/* ============================================================================
+   BRAND RING: anillo orbital girando lentamente
+   ============================================================================
+   Como la órbita de un electrón o el trazado de un circuito.
+   Se ve muy sutil, casi imperceptible.
+   ============================================================================ */
+
+.brand-ring {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 1px dashed rgba(96, 165, 250, 0.25);
+    animation: brand-ring-spin 20s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes brand-ring-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================================================
+   BRAND TEXT: texto con efecto de "flujo de datos"
+   ============================================================================
+   El texto tiene un degradado que se mueve lentamente de izquierda a derecha,
+   simulando flujo de datos o una señal viajando.
+   ============================================================================ */
+
+.brand-text {
+    position: relative;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: #fff;
+    letter-spacing: -0.02em;
+    background: linear-gradient(
+        90deg,
+        #FFFFFF 0%,
+        #FFFFFF 40%,
+        var(--hs-primary-light) 50%,
+        #FFFFFF 60%,
+        #FFFFFF 100%
+    );
+    background-size: 300% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: brand-shimmer 4s ease-in-out infinite;
+}
+
+@keyframes brand-shimmer {
+    0% {
+        background-position: 100% 0;
+    }
+    50% {
+        background-position: 0% 0;
+    }
+    100% {
+        background-position: 100% 0;
+    }
+}
+
+/* ============================================================================
+   BRAND HIGHLIGHT: "Store" con color diferente y glow
+   ============================================================================
+   En lugar de una sola palabra con shimmer, dividimos "Hardware" y "Store"
+   para darle un acento especial a la segunda parte.
+   ============================================================================ */
+
+.brand-highlight {
+    background: linear-gradient(135deg, #60A5FA 0%, #F59E0B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+    animation: highlight-glow 4s ease-in-out infinite;
+}
+
+@keyframes highlight-glow {
+    0%, 100% {
+        filter: drop-shadow(0 0 4px rgba(96, 165, 250, 0.4));
+    }
+    50% {
+        filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.6));
+    }
+}
+
+/* ============================================================================
+   HOVER GENERAL: subrayado con scan line
+   ============================================================================
+   Cuando pasas el mouse sobre el logo, una línea de "escaneo" recorre el
+   borde inferior, como un radar.
+   ============================================================================ */
+
+.navbar-brand-animated::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--hs-primary-light) 50%,
+        transparent 100%
+    );
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 1px;
+}
+
+.navbar-brand-animated:hover::after {
+    width: 80%;
+    animation: scan-line 1.5s ease-in-out infinite;
+}
+
+@keyframes scan-line {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* ============================================================================
+   MODO OSCURO: ajustes
+   ============================================================================
+   En dark mode el logo se ve más contrastado.
+   ============================================================================ */
+
+[data-bs-theme="dark"] .brand-mark {
+    background: linear-gradient(135deg, #6D28D9 0%, #8B5CF6 100%);
+    box-shadow:
+        0 2px 8px rgba(139, 92, 246, 0.5),
+        0 0 0 1px rgba(167, 139, 250, 0.4) inset;
+}
+
+[data-bs-theme="dark"] .brand-pulse {
+    border-color: #A78BFA;
+}
+
+[data-bs-theme="dark"] .brand-ring {
+    border-color: rgba(167, 139, 250, 0.3);
+}
+
+/* ============================================================================
+   RESPONSIVE: en móvil el logo es más compacto
+   ============================================================================ */
+
+@media (max-width: 575px) {
+    .brand-mark {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+
+    .brand-text {
+        font-size: 1rem;
+    }
+
+    .brand-ring {
+        display: none; /* El anillo es muy pequeño en móvil, se oculta */
+    }
+}
+
+/* ============================================================================
+   ACCESIBILIDAD: respetar prefers-reduced-motion
+   ============================================================================
+   Si el usuario prefiere movimiento reducido, desactivamos todas las
+   animaciones del logo excepto los colores estáticos.
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .brand-mark i,
+    .brand-pulse,
+    .brand-ring,
+    .brand-text,
+    .brand-highlight,
+    .navbar-brand-animated::after {
+        animation: none !important;
+    }
+
+    .brand-pulse,
+    .brand-ring {
+        opacity: 0.3;
+    }
+}
+
+/* ============================================================================
+   22. PÁGINA 404
+   ============================================================================ */
+.error-icon-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+    animation: error-pulse 2s ease-in-out infinite;
+}
+
+.error-icon-wrapper i {
+    animation: chip-breathe 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(37, 99, 235, 0.6));
+}
+
+@keyframes error-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
