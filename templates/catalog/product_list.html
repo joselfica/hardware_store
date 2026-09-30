@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block title %}Catálogo de Componentes PC{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     HERO COMPACTO + BUSCADOR
+     ============================================================ -->
+<section class="hero-compact">
+    <div class="container">
+        <div class="hero-compact__inner">
+            <div class="hero-compact__text">
+                <span class="hero-compact__tag">
+                    <i class="bi bi-lightning-charge-fill"></i> Envío gratis sobre $500.000
+                </span>
+                <h1>Potencia tu PC con los <span class="highlight">mejores componentes</span></h1>
+            </div>
+
+            <div class="hero-search">
+                <input type="text" id="hero-search-input"
+                       placeholder="Buscar procesadores, tarjetas de video..."
+                       aria-label="Buscar productos"
+                       onkeydown="if(event.key==='Enter'){event.preventDefault(); Catalog.heroSearch();}">
+                <button onclick="Catalog.heroSearch()">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     CHIPS DE CATEGORÍAS (navegación rápida)
+     ============================================================ -->
+<div class="container">
+    <div class="category-chips" id="category-chips" role="tablist" aria-label="Categorías"></div>
+</div>
+
+<!-- ============================================================
+     CATÁLOGO
+     ============================================================ -->
+<div class="container my-5">
+    <div class="row g-4">
+
+        <!-- Panel de filtros lateral -->
+        <div class="col-lg-3">
+            <div class="filter-panel">
+                <div class="hs-card">
+                    <div class="hs-card-header">
+                        <i class="bi bi-funnel-fill"></i> Filtros
+                    </div>
+                    <div class="hs-card-body">
+                        <form id="filter-form" onsubmit="Catalog.applyFilters(event)">
+
+                            <div class="mb-3">
+                                <label class="form-label">Buscar</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-end-0">
+                                        <i class="bi bi-search text-muted"></i>
+                                    </span>
+                                    <input type="text" id="filter-search" class="form-control border-start-0"
+                                           placeholder="Nombre, SKU...">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Categoría</label>
+                                <select id="filter-category" class="form-select">
+                                    <option value="">Todas las categorías</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Marca</label>
+                                <select id="filter-brand" class="form-select">
+                                    <option value="">Todas las marcas</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Rango de precio</label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="number" id="filter-price-min" class="form-control"
+                                               placeholder="Mín.">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number" id="filter-price-max" class="form-control"
+                                               placeholder="Máx.">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-check form-switch mb-3">
+                                <input type="checkbox" id="filter-in-stock" class="form-check-input">
+                                <label class="form-check-label fw-semibold" for="filter-in-stock">
+                                    Solo productos con stock
+                                </label>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Ordenar por</label>
+                                <select id="filter-ordering" class="form-select">
+                                    <option value="-created_at">Más recientes</option>
+                                    <option value="price">Precio: menor a mayor</option>
+                                    <option value="-price">Precio: mayor a menor</option>
+                                    <option value="name">Nombre A-Z</option>
+                                    <option value="-stock">Mayor stock</option>
+                                </select>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-hs-primary">
+                                    <i class="bi bi-search"></i> Aplicar filtros
+                                </button>
+                                <button type="button" class="btn btn-hs-outline"
+                                        onclick="Catalog.clearFilters()">
+                                    <i class="bi bi-x-circle"></i> Limpiar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid de productos -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="section-title">
+                        <i class="bi bi-grid-3x3-gap-fill text-primary"></i> Catálogo
+                    </h2>
+                    <p class="section-subtitle mb-0" id="results-count">Cargando productos...</p>
+                </div>
+                <button class="btn btn-hs-outline d-lg-none" type="button"
+                        data-bs-toggle="offcanvas" data-bs-target="#filtersOffcanvas">
+                    <i class="bi bi-funnel"></i> Filtros
+                </button>
+            </div>
+
+            <div class="row g-4" id="products-grid"></div>
+            <div id="pagination" class="mt-4"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/catalog.js"></script>
+<script src="/static/js/theme.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        Theme.init();
+        await Catalog.loadFilterOptions();
+        await Catalog.loadProducts();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Detalle de Producto{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Catálogo</a></li>
+            <li class="breadcrumb-item active">Detalle</li>
+        </ol>
+    </nav>
+    <div id="product-detail">
+        <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/catalog.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        Catalog.loadProductDetail({{ product_id }});
+    });
+</script>
+{% endblock %}

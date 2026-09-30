@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Gestión de Usuarios{% endblock %}
+
+{% block extra_css %}
+<script src="{% static 'js/admin/admin_guard.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row g-4">
+
+        <!-- Sidebar de administración -->
+        <div class="col-lg-3">
+            <div class="admin-sidebar">
+                <h5 class="text-white mb-3">
+                    <i class="bi bi-sliders text-warning"></i> Panel Admin
+                </h5>
+                <a href="/admin-panel/"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                <a href="/admin-panel/categorias/"><i class="bi bi-tags"></i> Categorías</a>
+                <a href="/admin-panel/marcas/"><i class="bi bi-award"></i> Marcas</a>
+                <a href="/admin-panel/productos/"><i class="bi bi-box-seam"></i> Productos</a>
+                <a href="/admin-panel/ordenes/"><i class="bi bi-receipt"></i> Órdenes</a>
+                <a href="/admin-panel/usuarios/"><i class="bi bi-people"></i> Usuarios</a>
+                <a href="/admin-panel/usuarios/" class="active"><i class="bi bi-people"></i> Usuarios</a>
+                <hr class="text-white-50 my-3">
+                <a href="/" target="_blank">
+                    <i class="bi bi-box-arrow-up-right"></i> Ver tienda
+                </a>
+            </div>
+        </div>
+
+        <!-- Contenido -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                <div>
+                    <h2 class="section-title">
+                        <i class="bi bi-people text-primary"></i> Usuarios
+                    </h2>
+                    <p class="section-subtitle mb-0">Gestiona clientes y administradores</p>
+                </div>
+                <button class="btn btn-hs-primary" onclick="UsersCRUD.openCreate()">
+                    <i class="bi bi-person-plus"></i> Nuevo Usuario
+                </button>
+            </div>
+
+            <!-- Filtros -->
+            <div class="hs-card mb-3 p-3">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label small mb-1">Buscar</label>
+                        <input type="text" id="user-search" class="form-control form-control-sm"
+                               placeholder="Usuario, email, nombre, RUT..."
+                               oninput="UsersCRUD.debouncedSearch()">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small mb-1">Rol</label>
+                        <select id="user-filter-role" class="form-select form-select-sm"
+                                onchange="UsersCRUD.load()">
+                            <option value="">Todos los roles</option>
+                            <option value="ADMIN">Administradores</option>
+                            <option value="CLIENTE">Clientes</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small mb-1">Estado</label>
+                        <select id="user-filter-active" class="form-select form-select-sm"
+                                onchange="UsersCRUD.load()">
+                            <option value="">Todos</option>
+                            <option value="true">Activos</option>
+                            <option value="false">Inactivos</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <button class="btn btn-hs-outline btn-sm" onclick="UsersCRUD.clearFilters()">
+                            <i class="bi bi-x-circle"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla -->
+            <div class="hs-card">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:60px;">ID</th>
+                                <th>Usuario</th>
+                                <th>Nombre</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th>Registro</th>
+                                <th class="text-end" style="width:160px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Paginación -->
+            <div id="users-pagination" class="mt-3"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     MODAL CREAR/EDITAR USUARIO
+     ============================================================ -->
+<div class="modal fade" id="userModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="user-form" onsubmit="UsersCRUD.save(event)">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalTitle">
+                        <i class="bi bi-person-plus"></i> Nuevo Usuario
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="user-id">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Username *</label>
+                            <input type="text" id="user-username" class="form-control"
+                                   required minlength="3" maxlength="150">
+                            <small class="text-muted">Único. No se puede cambiar tras crear.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email *</label>
+                            <input type="email" id="user-email" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nombres</label>
+                            <input type="text" id="user-first-name" class="form-control" maxlength="150">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Apellidos</label>
+                            <input type="text" id="user-last-name" class="form-control" maxlength="150">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">RUT</label>
+                            <input type="text" id="user-rut" class="form-control" maxlength="12">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Teléfono</label>
+                            <input type="text" id="user-phone" class="form-control" maxlength="20">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Rol *</label>
+                            <select id="user-role" class="form-select" required>
+                                <option value="CLIENTE">Cliente</option>
+                                <option value="ADMIN">Administrador de TI</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Contraseña <span id="password-required-mark" class="text-danger">*</span>
+                            </label>
+                            <input type="password" id="user-password" class="form-control"
+                                   minlength="8" autocomplete="new-password">
+                            <small class="text-muted" id="password-help">
+                                Obligatoria al crear. En edición, dejar vacío para no cambiar.
+                            </small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-check form-switch mt-2">
+                                <input type="checkbox" id="user-is-active" class="form-check-input" checked>
+                                <label class="form-check-label" for="user-is-active">Usuario activo</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch mt-2">
+                                <input type="checkbox" id="user-is-staff" class="form-check-input">
+                                <label class="form-check-label" for="user-is-staff">
+                                    Acceso a Django admin
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-hs-primary">
+                        <i class="bi bi-check-lg"></i> Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/admin/users_crud.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,72 @@
+<nav class="navbar navbar-expand-lg navbar-hs fixed-top" id="mainNavbar">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="bi bi-cpu-fill"></i>
+            <span>Hardware<span class="text-gradient" style="background: linear-gradient(135deg, #60A5FA, #F59E0B); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Store</span></span>
+        </a>
+
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav me-auto ms-lg-4">
+                <li class="nav-item">
+                    <a class="nav-link" href="/"><i class="bi bi-grid-3x3-gap"></i> Catálogo</a>
+                </li>
+                <li class="nav-item" id="nav-my-orders" style="display:none;">
+                    <a class="nav-link" href="/mis-ordenes/"><i class="bi bi-receipt-cutoff"></i> Mis Órdenes</a>
+                </li>
+<li class="nav-item" id="nav-admin-panel" style="display:none;">
+    <a class="nav-link" href="/admin-panel/">
+        <i class="bi bi-sliders"></i> Panel Admin
+    </a>
+</li>
+            </ul>
+
+            <ul class="navbar-nav align-items-center gap-2">
+                <!-- Toggle de tema -->
+                <li class="nav-item">
+                    <button class="theme-toggle" onclick="Theme.toggle()" title="Cambiar tema">
+                        <i class="bi bi-moon-stars" id="theme-icon"></i>
+                    </button>
+                </li>
+
+                <!-- Carro -->
+                <li class="nav-item" id="nav-cart" style="display:none;">
+                    <a class="cart-icon-wrapper" href="/carro/">
+                        <i class="bi bi-cart3 fs-5 text-white"></i>
+                        <span id="cart-badge" class="cart-badge" style="display:none;">0</span>
+                    </a>
+                </li>
+
+                <!-- Usuario -->
+                <li class="nav-item dropdown" id="nav-user" style="display:none;">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i>
+                        <span id="nav-username">Usuario</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2">
+                        <li class="px-3 py-2">
+                            <div class="fw-bold" id="nav-full-name">—</div>
+                            <small class="text-muted" id="nav-role">—</small>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/mis-ordenes/"><i class="bi bi-receipt"></i> Mis Órdenes</a></li>
+                        <li><a class="dropdown-item text-danger" href="#" onclick="Auth.logout(event)"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a></li>
+                    </ul>
+                </li>
+
+                <!-- Login -->
+                <li class="nav-item" id="nav-login">
+                    <a class="btn btn-hs-primary btn-sm" href="/login/">
+                        <i class="bi bi-box-arrow-in-right"></i> Ingresar
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Espacio para compensar el navbar fijo -->
+<div style="height: 76px;"></div>

@@ -1,0 +1,67 @@
+<footer class="footer-hs">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Columna: Acerca -->
+            <div class="col-lg-4 col-md-6">
+                <h5><i class="bi bi-cpu-fill text-primary"></i> Hardware Store</h5>
+                <p class="small">
+                    Tu tienda especializada en componentes informáticos.
+                    Calidad garantizada y envío a todo Chile.
+                </p>
+                <div class="d-flex gap-3 mt-3">
+                    <a href="#" class="text-white-50 fs-5"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-white-50 fs-5"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="text-white-50 fs-5"><i class="bi bi-twitter-x"></i></a>
+                    <a href="#" class="text-white-50 fs-5"><i class="bi bi-github"></i></a>
+                </div>
+            </div>
+
+            <!-- Columna: Enlaces -->
+            <div class="col-lg-2 col-md-6">
+                <h5>Navegación</h5>
+                <a href="/"><i class="bi bi-chevron-right small"></i> Catálogo</a>
+                <a href="/carro/"><i class="bi bi-chevron-right small"></i> Mi Carro</a>
+                <a href="/mis-ordenes/"><i class="bi bi-chevron-right small"></i> Mis Órdenes</a>
+            </div>
+
+            <!-- Columna: API -->
+            <div class="col-lg-2 col-md-6">
+                <h5>Desarrolladores</h5>
+                <a href="/api/docs/" target="_blank">
+                    <i class="bi bi-chevron-right small"></i> Swagger / OpenAPI
+                </a>
+                <a href="/api/schema/" target="_blank">
+                    <i class="bi bi-chevron-right small"></i> Esquema YAML
+                </a>
+                <a href="/admin/" target="_blank">
+                    <i class="bi bi-chevron-right small"></i> Panel Admin
+                </a>
+            </div>
+
+            <!-- Columna: DATOS DEL ALUMNO (REQUISITO DE LA EVALUACIÓN) -->
+            <div class="col-lg-4 col-md-6">
+                <h5><i class="bi bi-person-badge text-warning"></i> Información del Alumno</h5>
+                <div class="footer-student">
+                    <div class="mb-2">
+                        <i class="bi bi-person-fill text-warning"></i>
+                        <strong>{{ student_name }}</strong>
+                    </div>
+                    <div class="mb-2">
+                        <i class="bi bi-bookmark-fill text-warning"></i>
+                        Sección: <strong>{{ student_section }}</strong>
+                    </div>
+                    <div>
+                        <i class="bi bi-calendar-event text-warning"></i>
+                        Año: <strong>{{ student_year }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p class="mb-1">
+                &copy; 2026 Hardware Store — Evaluación EVA-2 Backend
+            </p>
+        </div>
+    </div>
+</footer>

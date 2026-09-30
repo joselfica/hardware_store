@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Gestión de Órdenes{% endblock %}
+
+{% block extra_css %}
+<script src="{% static 'js/admin/admin_guard.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row g-4">
+        <div class="col-lg-3">
+            <div class="admin-sidebar">
+                <h5 class="text-white mb-3"><i class="bi bi-sliders text-warning"></i> Panel Admin</h5>
+                <a href="/admin-panel/"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                <a href="/admin-panel/categorias/"><i class="bi bi-tags"></i> Categorías</a>
+                <a href="/admin-panel/marcas/"><i class="bi bi-award"></i> Marcas</a>
+                <a href="/admin-panel/productos/"><i class="bi bi-box-seam"></i> Productos</a>
+                <a href="/admin-panel/ordenes/" class="active"><i class="bi bi-receipt"></i> Órdenes</a>
+            </div>
+        </div>
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="section-title"><i class="bi bi-receipt text-primary"></i> Órdenes</h2>
+                    <p class="section-subtitle mb-0">Gestiona los estados de las órdenes</p>
+                </div>
+            </div>
+
+            <!-- Filtros por estado -->
+            <div class="mb-3" id="order-filters">
+                <div class="btn-group btn-group-sm" role="group">
+                    <button class="btn btn-outline-primary active" onclick="OrdersAdmin.setFilter('', event)">Todas</button>
+                    <button class="btn btn-outline-warning" onclick="OrdersAdmin.setFilter('PENDIENTE', event)">Pendientes</button>
+                    <button class="btn btn-outline-success" onclick="OrdersAdmin.setFilter('PAGADO', event)">Pagadas</button>
+                    <button class="btn btn-outline-primary" onclick="OrdersAdmin.setFilter('ENTREGADO', event)">Entregadas</button>
+                    <button class="btn btn-outline-danger" onclick="OrdersAdmin.setFilter('CANCELADO', event)">Canceladas</button>
+                </div>
+            </div>
+
+            <div class="hs-card">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Orden</th>
+                                <th>Cliente</th>
+                                <th class="text-center">Ítems</th>
+                                <th class="text-end">Total</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th class="text-end" style="width:180px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detalle Orden -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-receipt"></i> Detalle de Orden</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="order-detail-body"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/admin/orders_admin.js' %}"></script>
+{% endblock %}

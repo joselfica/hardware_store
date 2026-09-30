@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Panel de Administración{% endblock %}
+
+{% block extra_css %}
+<!-- Guard de rol: se ejecuta antes que nada -->
+<script src="{% static 'js/admin/admin_guard.js' %}"></script>
+<style>
+    .admin-sidebar {
+        background: linear-gradient(180deg, #0B1B3D 0%, #050B1F 100%);
+        border-radius: var(--hs-radius-lg);
+        padding: 1.5rem;
+        position: sticky;
+        top: 100px;
+        min-height: 500px;
+    }
+    .admin-sidebar a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: var(--hs-radius-sm);
+        color: rgba(255,255,255,0.75);
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+        transition: var(--hs-transition);
+    }
+    .admin-sidebar a:hover,
+    .admin-sidebar a.active {
+        background: rgba(37, 99, 235, 0.25);
+        color: #fff;
+        padding-left: 1.25rem;
+    }
+    .admin-sidebar a.active {
+        border-left: 3px solid var(--hs-accent);
+    }
+    .stat-card {
+        background: var(--hs-surface);
+        border: 1px solid var(--hs-border);
+        border-radius: var(--hs-radius-lg);
+        padding: 1.5rem;
+        transition: var(--hs-transition);
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--hs-shadow-lg);
+    }
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: var(--hs-radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #fff;
+    }
+    .stat-icon.blue   { background: linear-gradient(135deg, #2563EB, #1E40AF); }
+    .stat-icon.amber  { background: linear-gradient(135deg, #F59E0B, #D97706); }
+    .stat-icon.green  { background: linear-gradient(135deg, #10B981, #059669); }
+    .stat-icon.purple { background: linear-gradient(135deg, #8B5CF6, #6D28D9); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row g-4">
+
+        <!-- Sidebar de administración -->
+        <div class="col-lg-3">
+            <div class="admin-sidebar">
+                <h5 class="text-white mb-3">
+                    <i class="bi bi-sliders text-warning"></i> Panel Admin
+                </h5>
+                <a href="/admin-panel/" class="active">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="/admin-panel/categorias/">
+                    <i class="bi bi-tags"></i> Categorías
+                </a>
+                <a href="/admin-panel/marcas/">
+                    <i class="bi bi-award"></i> Marcas
+                </a>
+                <a href="/admin-panel/productos/">
+                    <i class="bi bi-box-seam"></i> Productos
+                </a>
+                <a href="/admin-panel/ordenes/">
+                    <i class="bi bi-receipt"></i> Órdenes
+                </a>
+                <a href="/admin-panel/usuarios/"><i class="bi bi-people"></i> Usuarios</a>
+                <hr class="text-white-50 my-3">
+                <a href="/" target="_blank">
+                    <i class="bi bi-box-arrow-up-right"></i> Ver tienda
+                </a>
+            </div>
+        </div>
+
+        <!-- Contenido -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="section-title">
+                        <i class="bi bi-speedometer2 text-primary"></i> Dashboard
+                    </h2>
+                    <p class="section-subtitle mb-0">
+                        Bienvenido, <strong id="admin-name">—</strong>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Estadísticas rápidas -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-muted small">Productos</div>
+                                <div class="fs-3 fw-bold" id="stat-products">—</div>
+                            </div>
+                            <div class="stat-icon blue"><i class="bi bi-box-seam"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-muted small">Categorías</div>
+                                <div class="fs-3 fw-bold" id="stat-categories">—</div>
+                            </div>
+                            <div class="stat-icon amber"><i class="bi bi-tags"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-muted small">Marcas</div>
+                                <div class="fs-3 fw-bold" id="stat-brands">—</div>
+                            </div>
+                            <div class="stat-icon purple"><i class="bi bi-award"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-muted small">Órdenes</div>
+                                <div class="fs-3 fw-bold" id="stat-orders">—</div>
+                            </div>
+                            <div class="stat-icon green"><i class="bi bi-receipt"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accesos rápidos -->
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="hs-card p-4">
+                        <h5><i class="bi bi-plus-circle text-primary"></i> Acciones rápidas</h5>
+                        <div class="d-grid gap-2 mt-3">
+                            <a href="/admin-panel/productos/" class="btn btn-hs-primary">
+                                <i class="bi bi-plus-lg"></i> Gestionar Productos
+                            </a>
+                            <a href="/admin-panel/ordenes/" class="btn btn-hs-outline">
+                                <i class="bi bi-list-check"></i> Ver Órdenes
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="hs-card p-4">
+                        <h5><i class="bi bi-info-circle text-primary"></i> Estado del sistema</h5>
+                        <ul class="list-unstyled small mt-3 mb-0">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                API REST operativa
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                PostgreSQL conectada
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                JWT con claims de rol activo
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                Swagger disponible en <a href="/api/docs/" target="_blank">/api/docs/</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const user = API.getUser();
+        document.getElementById('admin-name').textContent = user?.full_name || user?.username || 'Admin';
+
+        // Cargar estadísticas
+        try {
+            const [prods, cats, brands, orders] = await Promise.all([
+                API.get('/api/products/'),
+                API.get('/api/categories/'),
+                API.get('/api/brands/'),
+                API.get('/api/orders/'),
+            ]);
+            document.getElementById('stat-products').textContent = prods.count || (prods.results || prods).length;
+            document.getElementById('stat-categories').textContent = cats.count || (cats.results || cats).length;
+            document.getElementById('stat-brands').textContent = brands.count || (brands.results || brands).length;
+            document.getElementById('stat-orders').textContent = orders.count || (orders.results || orders).length;
+        } catch (e) {
+            console.error('Error cargando stats:', e);
+        }
+    });
+</script>
+{% endblock %}
