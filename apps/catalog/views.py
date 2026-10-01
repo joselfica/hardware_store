@@ -40,6 +40,7 @@ from drf_spectacular.utils import (
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser   # ← NUEVO
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
@@ -326,6 +327,12 @@ class ProductViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     filterset_class = ProductFilter
     pagination_class = LargePagination
+
+    # --- NUEVO: parsers para aceptar archivos en POST/PATCH ---
+    # JSONParser:      peticiones JSON normales (application/json).
+    # MultiPartParser: peticiones con archivos (multipart/form-data).
+    # FormParser:      formularios HTML tradicionales.
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
 
     # --- Backends de búsqueda y ordenamiento ---
     search_fields = ['name', 'sku', 'description', 'brand__name', 'category__name']

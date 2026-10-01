@@ -9,105 +9,201 @@
 {% block content %}
 <div class="container my-5">
     <div class="row g-4">
+
+        <!-- ============================================================
+             SIDEBAR DE ADMINISTRACIÓN
+             ============================================================ -->
         <div class="col-lg-3">
             <div class="admin-sidebar">
-                <h5 class="text-white mb-3"><i class="bi bi-sliders text-warning"></i> Panel Admin</h5>
+                <h5 class="text-white mb-3">
+                    <i class="bi bi-sliders text-warning"></i> Panel Admin
+                </h5>
                 <a href="/admin-panel/"><i class="bi bi-speedometer2"></i> Dashboard</a>
                 <a href="/admin-panel/categorias/"><i class="bi bi-tags"></i> Categorías</a>
                 <a href="/admin-panel/marcas/"><i class="bi bi-award"></i> Marcas</a>
-                <a href="/admin-panel/productos/" class="active"><i class="bi bi-box-seam"></i> Productos</a>
+                <a href="/admin-panel/productos/" class="active">
+                    <i class="bi bi-box-seam"></i> Productos
+                </a>
                 <a href="/admin-panel/ordenes/"><i class="bi bi-receipt"></i> Órdenes</a>
                 <a href="/admin-panel/usuarios/"><i class="bi bi-people"></i> Usuarios</a>
             </div>
         </div>
+
+        <!-- ============================================================
+             CONTENIDO PRINCIPAL
+             ============================================================ -->
         <div class="col-lg-9">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
                 <div>
-                    <h2 class="section-title"><i class="bi bi-box-seam text-primary"></i> Productos</h2>
+                    <h2 class="section-title">
+                        <i class="bi bi-box-seam text-primary"></i> Productos
+                    </h2>
                     <p class="section-subtitle mb-0">Gestiona el inventario</p>
                 </div>
                 <button class="btn btn-hs-primary" onclick="ProductsCRUD.openCreate()">
                     <i class="bi bi-plus-lg"></i> Nuevo Producto
                 </button>
             </div>
+
+            <!-- Buscador -->
+            <div class="hs-card mb-3 p-3">
+                <input type="text" id="product-search" class="form-control"
+                       placeholder="Buscar por nombre, SKU, marca..."
+                       oninput="ProductsCRUD.debouncedSearch()">
+            </div>
+
+            <!-- Tabla -->
             <div class="hs-card">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
+                        <thead>
                             <tr>
-                                <th>SKU</th>
+                                <th style="width: 60px;">Img</th>
+                                <th style="width: 140px;">SKU</th>
                                 <th>Producto</th>
                                 <th class="text-end">Precio</th>
                                 <th class="text-center">Stock</th>
                                 <th>Estado</th>
-                                <th class="text-end" style="width:140px;">Acciones</th>
+                                <th class="text-end" style="width: 120px;">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="products-tbody"></tbody>
                     </table>
                 </div>
             </div>
+
+            <!-- Paginación -->
+            <div id="products-pagination" class="mt-3"></div>
         </div>
     </div>
 </div>
 
-<!-- Modal Producto -->
+<!-- ============================================================
+     MODAL CREAR/EDITAR PRODUCTO
+     ============================================================
+     IMPORTANTE: enctype="multipart/form-data" es OBLIGATORIO para
+     poder subir archivos (imagen del producto) desde el formulario.
+     ============================================================ -->
 <div class="modal fade" id="productModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
-            <form id="product-form" onsubmit="ProductsCRUD.save(event)">
+            <form id="product-form" onsubmit="ProductsCRUD.save(event)"
+                  enctype="multipart/form-data">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="productModalTitle">Nuevo Producto</h5>
+                    <h5 class="modal-title" id="productModalTitle">
+                        <i class="bi bi-plus-circle"></i> Nuevo Producto
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="product-id">
                     <div class="row g-3">
+
+                        <!-- SKU + Nombre -->
                         <div class="col-md-6">
                             <label class="form-label">SKU *</label>
-                            <input type="text" id="product-sku" class="form-control" required maxlength="50"
-                                   placeholder="CPU-INT-13700K">
-                            <small class="text-muted">Único. No se puede modificar tras crear.</small>
+                            <input type="text" id="product-sku" class="form-control"
+                                   required maxlength="50" placeholder="CPU-INT-13700K">
+                            <small class="text-muted">
+                                Único. No se puede modificar tras crear.
+                            </small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Nombre *</label>
-                            <input type="text" id="product-name" class="form-control" required maxlength="200">
+                            <input type="text" id="product-name" class="form-control"
+                                   required maxlength="200"
+                                   placeholder="Intel Core i7-13700K">
                         </div>
+
+                        <!-- Categoría + Marca -->
                         <div class="col-md-6">
                             <label class="form-label">Categoría *</label>
-                            <select id="product-category" class="form-select" required></select>
+                            <select id="product-category" class="form-select" required>
+                                <option value="">Cargando categorías...</option>
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Marca *</label>
-                            <select id="product-brand" class="form-select" required></select>
+                            <select id="product-brand" class="form-select" required>
+                                <option value="">Cargando marcas...</option>
+                            </select>
                         </div>
-<div class="col-md-6">
-    <label class="form-label">Precio (CLP) *</label>
-    <input type="number" id="product-price" class="form-control"
-           required min="0" step="1" placeholder="449990">
-    <small class="text-muted">Precio en pesos chilenos (sin decimales).</small>
-</div>
-<!-- Stock entero -->
-<div class="col-md-6">
-    <label class="form-label">Stock *</label>
-    <input type="number" id="product-stock" class="form-control"
-           required min="0" step="1" placeholder="10">
-</div>
+
+                        <!-- Precio + Stock -->
+                        <div class="col-md-6">
+                            <label class="form-label">Precio (CLP) *</label>
+                            <input type="number" id="product-price" class="form-control"
+                                   required min="0" step="1" placeholder="449990">
+                            <small class="text-muted">
+                                Precio en pesos chilenos (sin decimales).
+                            </small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Stock *</label>
+                            <input type="number" id="product-stock" class="form-control"
+                                   required min="0" step="1" placeholder="10">
+                        </div>
+
+                        <!-- Imagen del producto -->
+                        <div class="col-12">
+                            <label class="form-label">Imagen del producto</label>
+                            <input type="file" id="product-image" class="form-control"
+                                   accept="image/*">
+                            <small class="text-muted">
+                                Formatos aceptados: JPG, PNG, WEBP, GIF.
+                                Tamaño máximo recomendado: 5 MB.
+                            </small>
+                        </div>
+
+                        <!-- Preview de la imagen actual (solo en edición) -->
+                        <div class="col-12" id="product-image-preview-container"
+                             style="display: none;">
+                            <label class="form-label">Imagen actual</label>
+                            <div class="d-flex align-items-start gap-3 flex-wrap">
+                                <img id="product-image-preview"
+                                     src=""
+                                     alt="Imagen actual del producto"
+                                     style="max-width: 180px; max-height: 180px;
+                                            object-fit: contain; border-radius: 8px;
+                                            border: 1px solid var(--hs-border);
+                                            background: var(--hs-surface-2);
+                                            padding: 4px;">
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="ProductsCRUD.clearImage()">
+                                    <i class="bi bi-trash"></i> Quitar imagen
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Descripción -->
                         <div class="col-12">
                             <label class="form-label">Descripción</label>
-                            <textarea id="product-description" class="form-control" rows="3"></textarea>
+                            <textarea id="product-description" class="form-control"
+                                      rows="3"
+                                      placeholder="Especificaciones técnicas del producto..."></textarea>
                         </div>
+
+                        <!-- Activo -->
                         <div class="col-12">
                             <div class="form-check form-switch">
-                                <input type="checkbox" id="product-active" class="form-check-input" checked>
-                                <label class="form-check-label" for="product-active">Producto activo</label>
+                                <input type="checkbox" id="product-active"
+                                       class="form-check-input" checked>
+                                <label class="form-check-label" for="product-active">
+                                    Producto activo
+                                </label>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-hs-primary"><i class="bi bi-check-lg"></i> Guardar</button>
+                    <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-hs-primary">
+                        <i class="bi bi-check-lg"></i> Guardar
+                    </button>
                 </div>
             </form>
         </div>

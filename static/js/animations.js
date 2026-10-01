@@ -332,18 +332,6 @@ const Animations = {
     // Evita el "pop-in" brusco.
     // ========================================================================
 
-    initImageFadeIn() {
-        const images = document.querySelectorAll('img[loading="lazy"]');
-        images.forEach((img) => {
-            if (img.complete) {
-                img.classList.add('img-loaded');
-            } else {
-                img.addEventListener('load', () => {
-                    img.classList.add('img-loaded');
-                });
-            }
-        });
-    },
 
     // ========================================================================
     // 10. BADGE DEL CARRO CON PULSO
@@ -379,7 +367,7 @@ const Animations = {
         this.initTypingEffect();
         this.initCardTilt();
         this.initSmoothScroll();
-        this.initImageFadeIn();
+       // this.initImageFadeIn();
     },
 };
 

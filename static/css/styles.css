@@ -1265,18 +1265,18 @@ a {
 }
 
 /* ============================================================================
-   IMÁGENES CON FADE-IN
+   IMÁGENES — Visibilidad garantizada
    ============================================================================
-   Evita el "pop-in" brusco cuando cargan las imágenes.
+   Las imágenes se ven desde el primer render. El fade-in se aplica con
+   animación CSS en el propio elemento `img`, no depende de JS.
    ============================================================================ */
-
-img[loading="lazy"] {
-    opacity: 0;
-    transition: opacity 0.4s ease;
+.product-image-wrapper img {
+    animation: img-fade-in 0.4s ease-out;
 }
 
-img[loading="lazy"].img-loaded {
-    opacity: 1;
+@keyframes img-fade-in {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
 }
 
 /* ============================================================================
@@ -1769,4 +1769,45 @@ body {
 @keyframes error-pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.1); }
+}
+
+/* ============================================================================
+   CONTENEDOR DE IMAGEN — Fondo claro para que las imágenes se vean bien
+   ============================================================================
+   Las imágenes de productos suelen tener fondo blanco o transparente.
+   Un fondo claro detrás ayuda a que se vean nítidas.
+   ============================================================================ */
+
+.product-image-wrapper {
+    position: relative;
+    padding: 1rem;
+    background: var(--hs-surface-2);
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: var(--hs-radius-lg) var(--hs-radius-lg) 0 0;
+    transition: background-color 0.3s ease;
+}
+
+/* Cuando el wrapper contiene una imagen, fondo blanco para que se vea bien */
+.product-image-wrapper:has(img) {
+    background: #ffffff;
+}
+
+[data-bs-theme="dark"] .product-image-wrapper:has(img) {
+    background: #f8fafc;
+}
+
+.product-image-wrapper img {
+    max-height: 90%;
+    max-width: 90%;
+    object-fit: contain;
+    transition: transform 0.4s ease;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
+}
+
+.product-card:hover .product-image-wrapper img {
+    transform: scale(1.08);
 }

@@ -83,20 +83,40 @@ const API = {
     },
 
     // --- Petición HTTP genérica con reintento automático por 401 ---
-    async request(method, url, body = null, retry = true) {
-        const headers = { 'Content-Type': 'application/json' };
+    //
+    // Parámetros:
+    //   method:    'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+    //   url:       Ruta relativa (ej: '/api/products/')
+    //   body:      Objeto JS (se serializa a JSON) o FormData (para archivos)
+    //   retry:     Interno, para reintentar tras refrescar el token
+    //   isFormData: True si el body es un FormData (subida de archivos).
+    //               En ese caso NO se setea Content-Type: el navegador lo
+    //               hace automáticamente con el boundary correcto.
+    async request(method, url, body = null, retry = true, isFormData = false) {
+        const headers = {};
+
+        // Si NO es FormData, usar JSON.
+        // Si SÍ es FormData, dejar que el navegador setee Content-Type.
+        if (!isFormData) {
+            headers['Content-Type'] = 'application/json';
+        }
+
         const token = this.getAccess();
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
         const options = { method, headers };
-        if (body) options.body = JSON.stringify(body);
+        if (body) {
+            options.body = isFormData ? body : JSON.stringify(body);
+        }
 
         let res = await fetch(`${API_BASE}${url}`, options);
 
         // Si el token expiró → intentar refrescar y reintentar una vez
         if (res.status === 401 && retry) {
             const refreshed = await this.refreshAccessToken();
-            if (refreshed) return this.request(method, url, body, false);
+            if (refreshed) {
+                return this.request(method, url, body, false, isFormData);
+            }
             this.clearTokens();
             window.location.href = '/login/';
             throw new Error('Sesión expirada');
