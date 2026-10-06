@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}Mi Perfil{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <!-- Encabezado -->
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center"
+                     style="width:60px;height:60px;border-radius:50%;
+                            background:var(--hs-gradient-primary);">
+                    <i class="bi bi-person-fill text-white fs-3"></i>
+                </div>
+                <div>
+                    <h2 class="section-title mb-0">Mi Perfil</h2>
+                    <p class="section-subtitle mb-0">
+                        Gestiona tus datos personales
+                    </p>
+                </div>
+            </div>
+
+            <!-- Card: Datos personales -->
+            <div class="hs-card mb-4">
+                <div class="hs-card-header">
+                    <i class="bi bi-person-badge"></i> Datos personales
+                </div>
+                <div class="hs-card-body">
+                    <form id="profile-form" onsubmit="Profile.save(event)">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Usuario</label>
+                                <input type="text" id="profile-username"
+                                       class="form-control" disabled>
+                                <small class="text-muted">
+                                    El username no se puede modificar.
+                                </small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Rol</label>
+                                <input type="text" id="profile-role"
+                                       class="form-control" disabled>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nombres</label>
+                                <input type="text" id="profile-first-name"
+                                       class="form-control" maxlength="150">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Apellidos</label>
+                                <input type="text" id="profile-last-name"
+                                       class="form-control" maxlength="150">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" id="profile-email"
+                                       class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">RUT</label>
+                                <input type="text" id="profile-rut"
+                                       class="form-control" maxlength="12"
+                                       placeholder="12.345.678-9">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Teléfono</label>
+                                <input type="text" id="profile-phone"
+                                       class="form-control" maxlength="20"
+                                       placeholder="+56912345678">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-hs-primary">
+                                    <i class="bi bi-check-lg"></i> Guardar cambios
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Card: Cambiar contraseña -->
+            <div class="hs-card">
+                <div class="hs-card-header">
+                    <i class="bi bi-shield-lock"></i> Cambiar contraseña
+                </div>
+                <div class="hs-card-body">
+                    <form id="password-form" onsubmit="Profile.changePassword(event)">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label">Contraseña actual</label>
+                                <input type="password" id="profile-old-password"
+                                       class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nueva contraseña</label>
+                                <input type="password" id="profile-new-password"
+                                       class="form-control" required minlength="8">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Confirmar nueva</label>
+                                <input type="password" id="profile-new-password-confirm"
+                                       class="form-control" required minlength="8">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-hs-outline">
+                                    <i class="bi bi-shield-check"></i> Cambiar contraseña
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/profile.js"></script>
+{% endblock %}

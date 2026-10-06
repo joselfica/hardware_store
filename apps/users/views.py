@@ -47,6 +47,7 @@ from .permissions import IsAdminRole, IsAuthenticatedAndActive
 from .serializers import (
     ChangePasswordSerializer,
     CustomTokenObtainPairSerializer,
+    UpdateProfileSerializer,
     RegisterSerializer,
     UserAdminSerializer,
     UserSerializer,
@@ -251,22 +252,33 @@ class LogoutView(APIView):
     summary='Obtener perfil del usuario autenticado',
     responses={200: UserSerializer},
 )
-class MeView(generics.RetrieveAPIView):
+class MeView(generics.RetrieveUpdateAPIView):
     """
-    Endpoint para obtener el perfil del usuario autenticado.
+    Endpoint para ver y actualizar el perfil del usuario autenticado.
 
-    Método: GET /api/auth/me/
-    Permisos: IsAuthenticatedAndActive (autenticado + activo).
+    Métodos:
+        - GET   /api/auth/me/  → Obtener el perfil actual.
+        - PATCH /api/auth/me/  → Actualizar datos personales (parcial).
+        - PUT   /api/auth/me/  → Actualizar datos personales (completo).
 
-    Retorna el UserSerializer con los datos del usuario actual.
+    Permisos: IsAuthenticatedAndActive.
+
+    Reglas:
+        - El usuario NO puede cambiar su username (ligado al historial).
+        - El usuario NO puede cambiar su role (anti-escalada).
+        - El email y RUT deben ser únicos.
     """
 
-    serializer_class = UserSerializer
     permission_classes = [IsAuthenticatedAndActive]
 
     def get_object(self):
-        """Retorna el usuario autenticado desde el request."""
         return self.request.user
+
+    def get_serializer_class(self):
+        """Usa el serializer específico para actualización."""
+        if self.request.method in ('PUT', 'PATCH'):
+            return UpdateProfileSerializer
+        return UserSerializer
 
 
 # =============================================================================

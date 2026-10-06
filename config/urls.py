@@ -9,6 +9,14 @@ Aquí se centralizan las rutas principales:
     - /api/schema/    → Esquema OpenAPI en YAML
     - /               → Frontend HTML
     - /admin-panel/   → Panel de administración personalizado (frontend)
+
+Handlers de error:
+    - handler404: se activa cuando DEBUG=False y una URL no existe.
+    - handler500: se activa cuando DEBUG=False y hay un error del servidor.
+
+Autor: José Fica
+Sección: AP-N4-C2
+Año: 2026
 ==============================================================================
 """
 
@@ -31,6 +39,8 @@ from apps.catalog.web_views import (
     ProductDetailView,
     LoginPageView,
     RegisterPageView,
+    # Páginas del cliente
+    ProfilePageView,              # ← AGREGADO
     CartPageView,
     OrderHistoryPageView,
     CheckoutPageView,
@@ -76,6 +86,7 @@ urlpatterns = [
     # ========================================================================
     # FRONTEND HTML - PÁGINAS DEL CLIENTE
     # ========================================================================
+    path('perfil/', ProfilePageView.as_view(), name='profile-page'),
     path('carro/', CartPageView.as_view(), name='cart-page'),
     path('mis-ordenes/', OrderHistoryPageView.as_view(), name='order-history-page'),
     path('checkout/', CheckoutPageView.as_view(), name='checkout-page'),
@@ -93,25 +104,24 @@ urlpatterns = [
 
 
 # ============================================================================
-# SERVIR ARCHIVOS MEDIA Y STATIC EN DESARROLLO
+# SERVIR ARCHIVOS MEDIA EN DESARROLLO
 # ============================================================================
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-   # urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
-
+# Con DEBUG=True, Django sirve los archivos subidos (imágenes de productos)
+# desde MEDIA_ROOT. Con DEBUG=False, esto se maneja con WhiteNoise o un
+# servidor web (Nginx, etc.).
 # ============================================================================
-# HANDLERS DE ERROR PERSONALIZADOS
-# ============================================================================
+#if settings.DEBUG:
+ #   urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-handler404 = 'apps.catalog.web_views.custom_404'
 
 # ============================================================================
 # HANDLERS DE ERROR PERSONALIZADOS
 # ============================================================================
 # IMPORTANTE: Solo se activan cuando DEBUG=False.
 # Con DEBUG=True, Django muestra sus propias páginas de error de desarrollo.
+#
+# 404: URL no encontrada → templates/404.html
+# 500: Error interno del servidor → templates/500.html
 # ============================================================================
-
 handler404 = 'apps.catalog.web_views.custom_404'
 handler500 = 'apps.catalog.web_views.custom_500'

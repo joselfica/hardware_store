@@ -332,10 +332,23 @@ class ChangeOrderStatusView(APIView):
         # --- 4. Regla adicional para clientes ---
         # Un cliente solo puede pagar SU propia orden. No puede cancelar,
         # entregar ni revertir estados.
+        # --- 4. Reglas adicionales para clientes ---
+        # Un cliente puede:
+        #   1. Pagar su propia orden (PENDIENTE → PAGADO).
+        #   2. Cancelar su propia orden SOLO si está PENDIENTE
+        #      (antes de pagar). Una vez pagada, la cancelación requiere
+        #      intervención del admin (implica reembolso).
         if not is_admin:
-            if new_status != Order.Status.PAGADO:
+            is_paying = (new_status == Order.Status.PAGADO)
+            is_cancelling_pending = (
+                new_status == Order.Status.CANCELADO
+                and order.status == Order.Status.PENDIENTE
+            )
+
+            if not (is_paying or is_cancelling_pending):
                 raise PermissionDenied(
-                    'Solo un Administrador puede cambiar la orden a este estado.'
+                    'Solo puedes pagar o cancelar órdenes pendientes. '
+                    'Contacta a soporte para otras modificaciones.'
                 )
 
         # --- 5. Delegar la transición al servicio ---

@@ -1811,3 +1811,15 @@ body {
 .product-card:hover .product-image-wrapper img {
     transform: scale(1.08);
 }
+
+.placeholder-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: 4rem;
+    color: var(--hs-text-muted);
+    opacity: 0.4;
+}

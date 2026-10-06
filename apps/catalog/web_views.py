@@ -8,9 +8,18 @@ del alumno (nombre, sección, año) para el footer.
 
 El frontend consume la API REST mediante JavaScript (fetch + JWT).
 
-Autor: [Tu Nombre Completo]
-Sección: [Tu Sección]
-Año: [Año actual]
+Vistas implementadas:
+    - Públicas: Home, ProductDetail, Login, Register.
+    - Cliente: Cart, OrderHistory, Checkout, Profile.
+    - Admin: Dashboard, Categories, Brands, Products, Orders, Users.
+    - Errores: custom_404, custom_500.
+
+Todas heredan de BaseContextMixin, que inyecta los datos del alumno en el
+contexto para que el footer los renderice dinámicamente.
+
+Autor: José Fica
+Sección: AP-N4-C2
+Año: 2026
 ==============================================================================
 """
 
@@ -18,7 +27,13 @@ from django.shortcuts import render
 from django.views.generic import TemplateView
 
 
-# --- Datos del alumno para el footer (REQUISITO DE LA EVALUACIÓN) ---
+# =============================================================================
+# DATOS DEL ALUMNO (REQUISITO DE LA EVALUACIÓN)
+# =============================================================================
+# Estos datos se inyectan en el contexto de TODAS las vistas y se renderizan
+# en el footer base (templates/partials/footer.html).
+# =============================================================================
+
 STUDENT_INFO = {
     'student_name': 'José Fica',
     'student_section': 'AP-N4-C2',
@@ -27,7 +42,12 @@ STUDENT_INFO = {
 
 
 class BaseContextMixin:
-    """Mixin que inyecta los datos del alumno en el contexto de cada vista."""
+    """
+    Mixin que inyecta los datos del alumno en el contexto de cada vista.
+
+    Todas las vistas del frontend heredan de este mixin, así el footer
+    siempre tiene acceso a student_name, student_section y student_year.
+    """
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -65,7 +85,7 @@ class RegisterPageView(BaseContextMixin, TemplateView):
 
 
 # =============================================================================
-# VISTAS PROTEGIDAS (el template valida el token vía JS)
+# VISTAS DEL CLIENTE (el template valida el token vía JS)
 # =============================================================================
 
 class CartPageView(BaseContextMixin, TemplateView):
@@ -82,6 +102,18 @@ class CheckoutPageView(BaseContextMixin, TemplateView):
     """Página de checkout."""
     template_name = 'orders/checkout.html'
 
+
+class ProfilePageView(BaseContextMixin, TemplateView):
+    """
+    Página de perfil del usuario autenticado.
+
+    Permite al usuario:
+        - Ver y editar sus datos personales.
+        - Cambiar su contraseña.
+
+    La verificación de autenticación ocurre en el frontend (profile.js).
+    """
+    template_name = 'auth/profile.html'
 
 
 # =============================================================================
@@ -119,21 +151,29 @@ class OrdersManageView(BaseContextMixin, TemplateView):
     """Gestión de órdenes (cambio de estados)."""
     template_name = 'admin_panel/orders_manage.html'
 
+
 class UsersManageView(BaseContextMixin, TemplateView):
     """Gestión de usuarios (solo Admin)."""
     template_name = 'admin_panel/users_manage.html'
 
-def custom_404(request, exception):
-    """Vista personalizada para error 404."""
-    return render(request, '404.html', status=404)
 
+# =============================================================================
+# HANDLERS DE ERROR PERSONALIZADOS
+# =============================================================================
+# IMPORTANTE: Solo se activan cuando DEBUG=False.
+# Con DEBUG=True, Django muestra sus propias páginas de error de desarrollo.
+#
+# Se registran en config/urls.py:
+#     handler404 = 'apps.catalog.web_views.custom_404'
+#     handler500 = 'apps.catalog.web_views.custom_500'
+# =============================================================================
 
 def custom_404(request, exception):
     """
     Vista personalizada para error 404.
 
     Se activa automáticamente cuando DEBUG=False y el usuario accede a una
-    URL que no existe. Con DEBUG=True, Django muestra su propia página.
+    URL que no existe.
 
     Args:
         request: Objeto Request de Django.

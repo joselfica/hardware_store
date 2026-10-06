@@ -7,13 +7,15 @@ Define los serializers encargados de:
     - Personalizar la respuesta del login JWT para incluir datos del usuario
       y claims de rol.
     - Exponer el perfil del usuario autenticado.
+    - Permitir al usuario editar sus propios datos personales.
+    - Permitir al admin gestionar usuarios (CRUD completo).
 
 Todos los serializers incluyen validaciones explícitas y mensajes de error
 en español para mejorar la experiencia del frontend.
 
-Autor: [Tu Nombre Completo]
-Sección: [Tu Sección]
-Año: [Año actual]
+Autor: José Fica
+Sección: AP-N4-C2
+Año: 2026
 ==============================================================================
 """
 
@@ -25,12 +27,23 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 User = get_user_model()
 
 
+# =============================================================================
+# SERIALIZER: LECTURA DEL USUARIO
+# =============================================================================
+# Se utiliza para exponer los datos del usuario autenticado en endpoints
+# como /api/auth/me/ y para incrustar el usuario en respuestas de login.
+# =============================================================================
+
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializer de lectura del modelo User.
 
-    Se utiliza para exponer los datos del usuario autenticado en endpoints
-    como /api/auth/me/ y para incrustar el usuario en respuestas de login.
+    Campos calculados:
+        - full_name: property del modelo que devuelve el nombre completo.
+        - role_display: etiqueta legible del rol ('Cliente', 'Administrador').
+
+    Ambos se declaran explícitamente porque NO son campos reales de la BD
+    (son property y método del modelo).
     """
 
     full_name = serializers.CharField(read_only=True)
@@ -45,6 +58,12 @@ class UserSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('id', 'role', 'is_active', 'date_joined')
 
+
+# =============================================================================
+# SERIALIZER: REGISTRO PÚBLICO
+# =============================================================================
+# Crea nuevos usuarios con rol CLIENTE forzado (anti-escalada de privilegios).
+# =============================================================================
 
 class RegisterSerializer(serializers.ModelSerializer):
     """
@@ -118,15 +137,17 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
+# =============================================================================
+# SERIALIZER: LOGIN JWT CON CLAIMS PERSONALIZADOS
+# =============================================================================
+# Extiende TokenObtainPairSerializer para:
+#   1. Inyectar claims personalizados (role, username, email) en el payload.
+#   2. Retornar los datos del usuario junto con los tokens.
+# =============================================================================
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """
     Serializer personalizado de login JWT.
-
-    Extiende TokenObtainPairSerializer para:
-        1. Inyectar claims personalizados (role, username, email) en el
-           payload del token access y refresh.
-        2. Retornar los datos del usuario junto con los tokens, evitando
-           que el frontend tenga que hacer un segundo request a /me/.
 
     ¿Por qué personalizar los claims?
         Los permisos DRF pueden leer request.auth['role'] directamente del
@@ -163,6 +184,12 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return data
 
 
+# =============================================================================
+# SERIALIZER: CAMBIO DE CONTRASEÑA
+# =============================================================================
+# Permite al usuario autenticado cambiar su contraseña.
+# =============================================================================
+
 class ChangePasswordSerializer(serializers.Serializer):
     """
     Serializer para el cambio de contraseña del usuario autenticado.
@@ -196,8 +223,11 @@ class ChangePasswordSerializer(serializers.Serializer):
         user.save()
         return user
 
+
 # =============================================================================
-# SERIALIZER DE GESTIÓN DE USUARIOS (solo Admin)
+# SERIALIZER: GESTIÓN DE USUARIOS (SOLO ADMIN)
+# =============================================================================
+# CRUD completo de usuarios accesible solo para administradores.
 # =============================================================================
 
 class UserAdminSerializer(serializers.ModelSerializer):
@@ -313,4 +343,73 @@ class UserAdminSerializer(serializers.ModelSerializer):
         if password:
             instance.set_password(password)
         instance.save()
-        return instance        
+        return instance
+
+
+# =============================================================================
+# SERIALIZER: ACTUALIZAR PERFIL PROPIO
+# =============================================================================
+# Permite al usuario autenticado actualizar SUS PROPIOS datos personales.
+#
+# Reglas de seguridad:
+#   - El usuario NO puede modificar su username (ligado al historial).
+#   - El usuario NO puede modificar su role (anti-escalada).
+#   - El usuario NO puede modificar is_active/is_staff/is_superuser.
+#   - El email debe ser único (case-insensitive).
+#   - El RUT debe ser único si está presente.
+# =============================================================================
+
+class UpdateProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer para que el usuario actualice sus propios datos.
+
+    Campos editables:
+        - first_name, last_name, email, rut, phone.
+
+    Campos de solo lectura (no editables por el usuario):
+        - id, username, role, is_active, is_staff, is_superuser, date_joined.
+
+    Nota: full_name y role_display se declaran explícitamente porque son
+    una property y un método del modelo, no campos reales de la BD. DRF
+    necesita saber cómo resolverlos, si no lanza un 500.
+    """
+
+    # --- Campos calculados (declarados explícitamente) ---
+    full_name = serializers.CharField(read_only=True)
+    role_display = serializers.CharField(source='get_role_display', read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'id', 'username', 'email', 'first_name', 'last_name',
+            'full_name', 'role', 'role_display', 'rut', 'phone',
+            'is_active', 'date_joined',
+        )
+        read_only_fields = (
+            'id', 'username', 'role', 'is_active', 'date_joined',
+        )
+
+    def validate_email(self, value):
+        """Valida que el email no esté en uso por OTRO usuario."""
+        qs = User.objects.filter(email__iexact=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(
+                'Ya existe un usuario con este correo electrónico.'
+            )
+        return value.lower()
+
+    def validate_rut(self, value):
+        """Valida que el RUT no esté en uso por OTRO usuario."""
+        if not value:
+            return value
+
+        qs = User.objects.filter(rut=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(
+                'Ya existe un usuario con este RUT.'
+            )
+        return value

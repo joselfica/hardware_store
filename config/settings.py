@@ -71,6 +71,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -97,7 +98,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # ============================================================
-# BASE DE DATOS - PostgreSQL (OBLIGATORIO por la evaluación)
+# BASE DE DATOS - PostgreSQLs
 # ============================================================
 DATABASES = {
     'default': {
@@ -307,7 +308,12 @@ LOGGING = {
 # ============================================================================
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True 
 
 # Servir archivos estáticos y media incluso con DEBUG=False
 WHITENOISE_USE_FINDERS = True
-WHITENOISE_AUTOREFRESH = DEBUG   # Solo en desarrollo
+#WHITENOISE_AUTOREFRESH = DEBUG   # Solo en desarrollo
+
+# Servir archivos MEDIA (imágenes subidas)
+WHITENOISE_ROOT = BASE_DIR / 'media'
