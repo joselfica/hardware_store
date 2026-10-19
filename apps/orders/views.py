@@ -41,7 +41,7 @@ Año: 2026
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -420,3 +420,72 @@ class AllOrdersView(generics.ListAPIView):
     search_fields = ['order_number', 'user__username', 'user__email']
     ordering_fields = ['created_at', 'total', 'status']
     ordering = ['-created_at']
+
+from django.shortcuts import redirect
+from django.urls import reverse
+from .services import iniciar_pago_webpay
+
+class IniciarPagoWebpayView(APIView):
+    """
+    Endpoint que el frontend llama al hacer click en 'Pagar'.
+    Retorna la URL de Webpay para que el usuario pague.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, order_number):
+        try:
+            order = Order.objects.get(order_number=order_number, user=request.user)
+        except Order.DoesNotExist:
+            return Response({'detail': 'Orden no encontrada.'}, status=404)
+
+        # La URL a la que Transbank devolverá al usuario
+        return_url = request.build_absolute_uri(
+            reverse('orders:webpay-return', kwargs={'order_number': order.order_number})
+        )
+
+        # Iniciar pago en Transbank
+        response = iniciar_pago_webpay(order, return_url)
+
+        # Retornar la URL y el token al frontend
+        return Response({
+            'url': response['url'],
+            'token': response['token']
+        })
+
+class WebpayReturnView(APIView):
+    """
+    Endpoint al que Transbank redirige después del pago.
+    """
+    permission_classes = [AllowAny] # Transbank vuelve como usuario anónimo
+
+    def get(self, request, order_number):
+        token = request.GET.get('token_ws')
+        if not token:
+            return Response({'detail': 'Token no recibido.'}, status=400)
+
+        try:
+            order = Order.objects.get(order_number=order_number)
+        except Order.DoesNotExist:
+            return Response({'detail': 'Orden no encontrada.'}, status=404)
+
+        # Confirmar transacción con Transbank
+        options = WebpayOptions(
+            commerce_code=settings.TBK_COMMERCE_CODE,
+            api_key=settings.TBK_API_KEY,
+            integration_type=IntegrationType.TEST
+        )
+        tx = Transaction(options)
+        response = tx.commit(token)
+
+        # Verificar si el pago fue exitoso
+        if response['status'] == 'AUTHORIZED':
+            # Cambiar estado a PAGADO usando tu lógica transaccional existente
+            try:
+                change_order_status(order, Order.Status.PAGADO)
+                # Redirigir a la página de órdenes del usuario con mensaje de éxito
+                return redirect('/mis-ordenes/?pago=exitoso')
+            except Exception as e:
+                return Response({'detail': str(e)}, status=400)
+        else:
+            # Pago rechazado por Transbank
+            return redirect('/mis-ordenes/?pago=rechazado')

@@ -4,29 +4,13 @@
  * ============================================================================
  * Consume /api/orders/my-orders/ y permite al cliente:
  *   - Ver sus órdenes.
- *   - Pagar las órdenes PENDIENTES.
- *   - Cancelar las órdenes PENDIENTES (antes de pagar).
+ *   - Pagar las órdenes PENDIENTES vía Transbank Webpay.
+ *   - Cancelar las órdenes PENDIENTES.
  *   - Ver el detalle de cada orden.
- *
- * Reglas de negocio:
- *   - El cliente puede pagar y cancelar SOLO órdenes PENDIENTES.
- *   - Una vez pagada, la cancelación requiere intervención del admin.
- *
- * Notas de estilo:
- *   - Los badges de estado usan text-bg-* para contraste automático.
- *   - Los botones usan btn-hs-* para mantener la identidad visual.
- *
- * Autor: José Fica
- * Sección: AP-N4-C2
- * Año: 2026
  * ============================================================================
  */
 
 const Orders = {
-    // ========================================================================
-    // CARGA DE ÓRDENES
-    // ========================================================================
-
     async load() {
         const container = document.getElementById('orders-container');
         if (!API.isAuthenticated()) {
@@ -41,20 +25,12 @@ const Orders = {
             const orders = data.results || data;
             this.render(orders);
         } catch (e) {
-            container.innerHTML = `
-                <div class="alert alert-danger">
-                    Error al cargar órdenes.
-                </div>`;
+            container.innerHTML = `<div class="alert alert-danger">Error al cargar órdenes.</div>`;
         }
     },
 
-    // ========================================================================
-    // RENDERIZADO
-    // ========================================================================
-
     render(orders) {
         const container = document.getElementById('orders-container');
-
         if (orders.length === 0) {
             container.innerHTML = `
                 <div class="text-center py-5">
@@ -65,7 +41,6 @@ const Orders = {
             return;
         }
 
-        // Colores de Bootstrap compatibles con text-bg-* para buen contraste
         const statusColors = {
             'PENDIENTE': 'warning',
             'PAGADO': 'success',
@@ -74,11 +49,9 @@ const Orders = {
         };
 
         container.innerHTML = orders.map(o => {
-            // Botones de acción según el estado de la orden
             let actionsHtml = '';
 
             if (o.status === 'PENDIENTE') {
-                // PENDIENTE → puede Pagar o Cancelar
                 actionsHtml = `
                     <button class="btn btn-sm btn-hs-success me-1"
                             onclick="Orders.pay('${o.order_number}')">
@@ -90,7 +63,6 @@ const Orders = {
                     </button>
                 `;
             }
-            // PAGADO, ENTREGADO, CANCELADO: solo ver (sin acciones de cambio)
 
             actionsHtml += `
                 <button class="btn btn-sm btn-hs-outline"
@@ -133,71 +105,40 @@ const Orders = {
         }).join('');
     },
 
-    // ========================================================================
-    // ACCIÓN: PAGAR
-    // ========================================================================
-
     async pay(orderNumber) {
-        if (!confirm('¿Confirmar el pago?\n\nSe descontará stock del catálogo.')) {
+        if (!confirm('¿Ir a Webpay para pagar?\n\nSerás redirigido a la pasarela de Transbank.')) {
             return;
         }
 
         try {
-            await API.patch(`/api/orders/${orderNumber}/status/`, {
-                status: 'PAGADO',
-            });
-            showFlash('¡Pago confirmado! Stock descontado.', 'success');
-            this.load();
+            const response = await API.post(`/api/orders/${orderNumber}/webpay/`);
+            
+            if (response.url && response.token) {
+                // Redirigir a Transbank
+                window.location.href = `${response.url}?token_ws=${response.token}`;
+            } else {
+                showFlash('Error al iniciar el pago.', 'danger');
+            }
         } catch (e) {
-            const msg = e.data?.stock?.[0]
-                || e.data?.status?.[0]
-                || 'Error al pagar.';
-            showFlash(msg, 'danger');
+            showFlash('Error al conectar con Transbank.', 'danger');
         }
     },
-
-    // ========================================================================
-    // ACCIÓN: CANCELAR (nuevo)
-    // ========================================================================
-    // El cliente puede cancelar SOLO sus órdenes en estado PENDIENTE.
-    // Una vez pagada, la cancelación requiere intervención del admin.
-    //
-    // Al cancelar una orden PENDIENTE, el stock no se ve afectado porque
-    // nunca se descontó (solo se descuenta al pagar).
-    // ========================================================================
 
     async cancel(orderNumber) {
-        const confirmMsg = [
-            '¿Cancelar esta orden?',
-            '',
-            'Esta acción no se puede deshacer.',
-            'Si la orden estaba pendiente, no se descontará stock.',
-        ].join('\n');
-
-        if (!confirm(confirmMsg)) return;
-
+        if (!confirm('¿Cancelar esta orden? Esta acción no se puede deshacer.')) return;
         try {
-            await API.patch(`/api/orders/${orderNumber}/status/`, {
-                status: 'CANCELADO',
-            });
-            showFlash('Orden cancelada correctamente.', 'success');
+            await API.patch(`/api/orders/${orderNumber}/status/`, { status: 'CANCELADO' });
+            showFlash('Orden cancelada.', 'success');
             this.load();
         } catch (e) {
-            const msg = e.data?.status?.[0]
-                || e.data?.detail
-                || 'No se pudo cancelar la orden.';
+            const msg = e.data?.status?.[0] || e.data?.detail || 'Error al cancelar.';
             showFlash(msg, 'danger');
         }
     },
-
-    // ========================================================================
-    // ACCIÓN: VER DETALLE
-    // ========================================================================
 
     async showDetail(orderNumber) {
         try {
             const o = await API.get(`/api/orders/${orderNumber}/`);
-
             const itemsHtml = o.items.map(i => `
                 <tr>
                     <td>${escapeHtml(i.product_name)}</td>
@@ -215,14 +156,11 @@ const Orders = {
                                 <h5 class="modal-title">
                                     Orden <code>${o.order_number.slice(0, 8)}...</code>
                                 </h5>
-                                <button type="button" class="btn-close"
-                                        data-bs-dismiss="modal"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body">
                                 <p><strong>Estado:</strong> ${o.status_display}</p>
                                 <p><strong>Fecha:</strong> ${new Date(o.created_at).toLocaleString('es-CL')}</p>
-                                ${o.paid_at ? `<p><strong>Pagado:</strong> ${new Date(o.paid_at).toLocaleString('es-CL')}</p>` : ''}
-                                ${o.cancelled_at ? `<p><strong>Cancelado:</strong> ${new Date(o.cancelled_at).toLocaleString('es-CL')}</p>` : ''}
                                 <table class="table">
                                     <thead>
                                         <tr>
@@ -244,8 +182,7 @@ const Orders = {
                         </div>
                     </div>
                 </div>`;
-
-            // Elimina modal previo si existe
+            
             document.getElementById('orderModal')?.remove();
             document.body.insertAdjacentHTML('beforeend', modal);
             new bootstrap.Modal(document.getElementById('orderModal')).show();
@@ -255,9 +192,6 @@ const Orders = {
     },
 };
 
-// ============================================================================
-// INICIALIZACIÓN
-// ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('orders-container')) Orders.load();
 });

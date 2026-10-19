@@ -24,7 +24,9 @@ Año: 2026
 ==============================================================================
 """
 
+
 from django.urls import path
+from .views import IniciarPagoWebpayView, WebpayReturnView
 
 from .views import (
     AllOrdersView,
@@ -32,6 +34,8 @@ from .views import (
     CheckoutView,
     MyOrdersView,
     OrderDetailView,
+    IniciarPagoWebpayView,
+    WebpayReturnView,
 )
 
 app_name = 'orders'
@@ -66,6 +70,8 @@ urlpatterns = [
         OrderDetailView.as_view(),
         name='order-detail',
     ),
+    path('orders/<uuid:order_number>/webpay/', IniciarPagoWebpayView.as_view(), name='webpay-init'),
+    path('orders/<uuid:order_number>/webpay-return/', WebpayReturnView.as_view(), name='webpay-return'),
     path(
         'orders/<uuid:order_number>/status/',
         ChangeOrderStatusView.as_view(),

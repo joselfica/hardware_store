@@ -326,3 +326,32 @@ def change_order_status(order, new_status):
         return mark_as_delivered(order)
 
     raise ValidationError({'status': 'Estado no reconocido.'})
+
+# =============================================================================
+# INTEGRACIÓN CON TRANSBANK (WEBPAY PLUS) - AMBIENTE DE INTEGRACIÓN
+# =============================================================================
+from transbank.webpay.webpay_plus.transaction import Transaction
+from transbank.common.options import WebpayOptions
+from transbank.common.integration_type import IntegrationType
+from django.conf import settings
+
+def iniciar_pago_webpay(order, return_url):
+    """
+    Crea una transacción en Webpay y retorna la URL y el token para redirigir.
+    """
+    # Configurar opciones (usando las variables del .env)
+    options = WebpayOptions(
+        commerce_code=settings.TBK_COMMERCE_CODE,
+        api_key=settings.TBK_API_KEY,
+        integration_type=IntegrationType.TEST
+    )
+    tx = Transaction(options)
+
+    # Crear transacción
+    response = tx.create(
+        buy_order=str(order.order_number)[:26],
+        session_id=str(order.user.id),
+        amount=int(order.total),
+        return_url=return_url
+    )
+    return response

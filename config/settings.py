@@ -317,3 +317,8 @@ WHITENOISE_USE_FINDERS = True
 
 # Servir archivos MEDIA (imágenes subidas)
 WHITENOISE_ROOT = BASE_DIR / 'media'
+
+# Credenciales de Transbank (leídas del .env)
+TBK_COMMERCE_CODE = config('TBK_COMMERCE_CODE', default='')
+TBK_API_KEY = config('TBK_API_KEY', default='')
+TBK_ENVIRONMENT = config('TBK_ENVIRONMENT', default='TEST')
